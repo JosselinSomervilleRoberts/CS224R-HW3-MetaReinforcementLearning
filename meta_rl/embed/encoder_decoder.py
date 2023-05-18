@@ -159,6 +159,10 @@ class EncoderDecoder(Embedder, relabel.RewardLabeler):
         # Parts of the decoder_context_loss are masked below for you to handle
         # batches of episodes of different lengths. You do not need to do
         # anything about this.
+
+        decoder_context_loss = (all_decoder_embeddings - id_embeddings.unsqueeze(1)) ** 2
+        decoder_context_loss = decoder_context_loss.sum(-1)
+
         # ********************************************************
         # ******************* YOUR CODE HERE *********************
         # ********************************************************
@@ -246,9 +250,15 @@ class EncoderDecoder(Embedder, relabel.RewardLabeler):
         # Additionally, a penalty c is applied to the rewards. This is
         # alredy done for you below, and you don't need to do anything.
         # See Equation (5) of the DREAM paper if you're curious.
+        
+        rewards = (all_decoder_embeddings[:, 1:] - all_decoder_embeddings[:, :-1]).sum(-1)
+        distances = (all_decoder_embeddings - id_embeddings.unsqueeze(1)) ** 2
+        distances = distances.sum(-1)
+
         # ********************************************************
         # ******************* YOUR CODE HERE *********************
         # ********************************************************
+
         return ((rewards - self._penalty) * mask[:, 1:]).detach(), distances
     
 
